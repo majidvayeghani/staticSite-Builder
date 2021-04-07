@@ -1,6 +1,7 @@
 from containerBuilder import merg
 from costumeBuilder import addImg
 from indexBuilder import build
+from gitPy import autoPush
 import sys  
 import re
 import requests
@@ -12,6 +13,8 @@ x = int(input(" 1 for add new, 2 for edit, 3 for delete: "))
 if(x == 1):
   #ToDo: copy img from other locations to project location.
   x = "y"
+  fileList = []
+  commit = ""
   while ( x == 'Y' or x == 'y'):
     number = input ("input the image's number: ")
     source = input( "input the image's addrees: ") 
@@ -20,8 +23,7 @@ if(x == 1):
     regex = "([^\\s]+(\\.(?i)(jpe?g|png|gif|bmp))$)"
     reg = re.compile(regex)
    
-    if(re.search(reg,source) == True):
-
+    if(re.search(reg,source)):
       downloaded_obj = requests.get(source)
       f_format = os.path.splitext(source)[-1]
       f_name = 'img_{}{}'.format(number,f_format)
@@ -29,8 +31,8 @@ if(x == 1):
       destination = "/home/majid/Desktop/project/images/" + f_name
       with open(destination, "wb") as file:
         file.write(downloaded_obj.content)
+    
     else:
-      
       f_format = os.path.splitext(source)[-1]
       f_name = 'img_{}{}'.format(number,f_format)
       destination = "/home/majid/Desktop/project/images/" + f_name
@@ -40,7 +42,7 @@ if(x == 1):
         shutil.copyfile(source, destination)
         print("File copied successfully.")
 
-        # If source and destination are same
+      # If source and destination are same
       except shutil.SameFileError:
         print("Source and destination represents the same file.")
         
@@ -70,9 +72,19 @@ if(x == 1):
 
     addImg(fileName,destination,total_input)
 
+    fileList.append(destination)
+
+    
     x = input( "Do you want to add new image? Y for continue, any Button for end. ")
+    # End of adding img
+  
+  # for auto on github  
+  for i in fileList:
+    massege = "img_{}{} ".format(number,f_format)
+    commit = commit + massege
+    
+  autoPush(fileList,commit)
 
   merg()
  
   build()
-  
