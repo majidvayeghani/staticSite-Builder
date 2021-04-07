@@ -5,33 +5,57 @@ import sys
 import re
 import requests
 import os
+import shutil
 
 x = int(input(" 1 for add new, 2 for edit, 3 for delete: "))
-
 
 if(x == 1):
   #ToDo: copy img from other locations to project location.
   x = "y"
   while ( x == 'Y' or x == 'y'):
     number = input ("input the image's number: ")
-    name = input( "input the image's addrees: ") 
+    source = input( "input the image's addrees: ") 
     
     #regex for valid image address
     regex = "([^\\s]+(\\.(?i)(jpe?g|png|gif|bmp))$)"
     reg = re.compile(regex)
    
-    if(re.search(reg,name)):
-      downloaded_obj = requests.get(name)
-      f_format = os.path.splitext(name)[-1]
+    if(re.search(reg,source) == True):
+
+      downloaded_obj = requests.get(source)
+      f_format = os.path.splitext(source)[-1]
       f_name = 'img_{}{}'.format(number,f_format)
       fileName = 'img_{}'.format(number) #for costume's html file
-      imgName = "/home/majid/Desktop/project/images/" + f_name
-      print(imgName)
-      with open(imgName, "wb") as file:
+      destination = "/home/majid/Desktop/project/images/" + f_name
+      with open(destination, "wb") as file:
         file.write(downloaded_obj.content)
     else:
-      break
-    
+      
+      f_format = os.path.splitext(source)[-1]
+      f_name = 'img_{}{}'.format(number,f_format)
+      destination = "/home/majid/Desktop/project/images/" + f_name
+      fileName = 'img_{}'.format(number) #for costume's html file
+
+      try:
+        shutil.copyfile(source, destination)
+        print("File copied successfully.")
+
+        # If source and destination are same
+      except shutil.SameFileError:
+        print("Source and destination represents the same file.")
+        
+      # If destination is a directory.
+      except IsADirectoryError:
+        print("Destination is a directory.")
+        
+      # If there is any permission issue
+      except PermissionError:
+        print("Permission denied.")
+        
+      # For other errors
+      except:
+        print("Error occurred while copying file.")
+
     # for manage enter character in user input.
     total_input = []
     print( "input the image's caption': " )
@@ -44,7 +68,7 @@ if(x == 1):
 
     total_input = '<br>'.join(total_input) #<br> tag uses in html file.
 
-    addImg(fileName,imgName,total_input)
+    addImg(fileName,destination,total_input)
 
     x = input( "Do you want to add new image? Y for continue, any Button for end. ")
 
